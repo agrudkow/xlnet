@@ -27,7 +27,7 @@ import function_builder
 from classifier_utils import PaddingInputExample
 from classifier_utils import convert_single_example
 from prepro_utils import preprocess_text, encode_ids
-from F1metrics import load_files_to_metrics
+from f1_metrics import load_files_to_metrics
 
 
 # Model
