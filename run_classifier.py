@@ -144,7 +144,9 @@ flags.DEFINE_bool("is_regression", default=False,
 # ists
 flags.DEFINE_bool("calc_ists_metrics", default=False, help="Calculate metrics for prediotions in iSTS task")
 flags.DEFINE_string("pred_file", default=None,
-      help="Specifies tsv file with predictions. If None, ")
+      help="Specifies tsv file with predictions. If None, calc metrincs for all predictions.")
+flags.DEFINE_string("metrics_dir", default=None,
+      help="Specifies the directory where metrics will we located.")
 
 
 FLAGS = flags.FLAGS
@@ -694,7 +696,7 @@ def main(_):
   if FLAGS.save_steps is not None:
     FLAGS.iterations = min(FLAGS.iterations, FLAGS.save_steps)
 
-  if FLAGS.calc_ists_metrics:
+  if FLAGS.calc_ists_metrics and FLAGS.metrics_dir:
     predictions = []
 
     if not FLAGS.pred_file:
@@ -702,9 +704,18 @@ def main(_):
     else:
       predictions = [model_utils.extract_global_step(FLAGS.pred_file[:-4]), FLAGS.pred_file]
     
-    for global_step, pred_file_path in sorted(predictions, key=lambda x: x[0]):
-      f1_scores = calc_ists_metrics(pred_file_path, FLAGS.data_dir + "/test.tsv")
-      tf.logging.info( 'Dataset: ' + FLAGS.data_dir.split("/")[-1] + " Step: " + str(global_step) + ' [F1 Type]: {} \n [F1 Score]: {} \n [F1 T+S]: {}' % f1_scores)
+    dataset_name = FLAGS.DATA_DIR.split("/")[-1]
+
+    # Write metrics to file
+    with tf.gfile.Open(os.path.join(FLAGS.metrics_dir, "{}.tsv".format("metrics-" + dataset_name)), "w") as fout:
+      fout.write("step\\f1-type\\f1-socre\\f1-t+s\n")
+
+      # Calc metric for all predictions
+      for global_step, pred_file_path in sorted(predictions, key=lambda x: x[0]):
+        f1_scores = calc_ists_metrics(pred_file_path, FLAGS.data_dir + "/test.tsv")
+        tf.logging.info( 'Dataset: {} Step: {} [F1 Type]: {} \n [F1 Score]: {} \n [F1 T+S]: {}' % (dataset_name, global_step, *f1_scores))
+        fout.write('{}\t{}\t{}\t{}\n' % (global_step, *f1_scores))
+        
 
     # End execution after caclulations
     return None
