@@ -82,7 +82,7 @@ def read_predicted(predicted_file):
     predicted_scores = []
 
     for row in reader:
-        print(row)
+        # print(row)
         type, score = row[1].split("-")
         predicted_types.append(type)
         predicted_scores.append(int(score))

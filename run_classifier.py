@@ -704,17 +704,20 @@ def main(_):
     else:
       predictions = [model_utils.extract_global_step(FLAGS.pred_file[:-4]), FLAGS.pred_file]
     
-    dataset_name = FLAGS.DATA_DIR.split("/")[-1]
+    if not tf.gfile.Exists(FLAGS.metrics_dir):
+      tf.gfile.MakeDirs(FLAGS.metrics_dir)
+    
+    dataset_name = FLAGS.data_dir.split("/")[-1]
 
     # Write metrics to file
     with tf.gfile.Open(os.path.join(FLAGS.metrics_dir, "{}.tsv".format("metrics-" + dataset_name)), "w") as fout:
-      fout.write("step\\f1-type\\f1-socre\\f1-t+s\n")
+      fout.write("step\tf1-type\tf1-socre\tf1-t+s\n")
 
       # Calc metric for all predictions
       for global_step, pred_file_path in sorted(predictions, key=lambda x: x[0]):
         f1_scores = calc_ists_metrics(pred_file_path, FLAGS.data_dir + "/test.tsv")
-        tf.logging.info( 'Dataset: {} Step: {} [F1 Type]: {} \n [F1 Score]: {} \n [F1 T+S]: {}' % (dataset_name, global_step, *f1_scores))
-        fout.write('{}\t{}\t{}\t{}\n' % (global_step, *f1_scores))
+        print('\n Dataset: {}\n Step: {}\n [F1 Type]: {}\n [F1 Score]: {}\n [F1 T+S]: {}'.format(dataset_name, global_step, *f1_scores))
+        fout.write('{}\t{}\t{}\t{}\n'.format(global_step, *f1_scores))
         
 
     # End execution after caclulations
