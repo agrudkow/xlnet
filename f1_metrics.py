@@ -102,6 +102,3 @@ def read_target(target_file):
         tokens.append(int(row[3]))
 
     return target_types, target_scores, tokens
-
-metrics = load_files_to_metrics("pred/ists/images-8000/ists.tsv", "ists/images/test.tsv")
-metrics.print_statistics()

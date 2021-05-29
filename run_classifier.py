@@ -27,6 +27,7 @@ import function_builder
 from classifier_utils import PaddingInputExample
 from classifier_utils import convert_single_example
 from prepro_utils import preprocess_text, encode_ids
+from f1_metrics import load_files_to_metrics
 
 
 # Model
@@ -139,6 +140,14 @@ flags.DEFINE_string("cls_scope", default=None,
       help="Classifier layer scope.")
 flags.DEFINE_bool("is_regression", default=False,
       help="Whether it's a regression task.")
+
+# ists
+flags.DEFINE_bool("calc_ists_metrics", default=False, help="Calculate metrics for prediotions in iSTS task")
+flags.DEFINE_string("pred_file", default=None,
+      help="Specifies tsv file with predictions. If None, calc metrincs for all predictions.")
+flags.DEFINE_string("metrics_dir", default=None,
+      help="Specifies the directory where metrics will we located.")
+
 
 FLAGS = flags.FLAGS
 
@@ -675,6 +684,10 @@ def get_model_fn(n_class):
 
   return model_fn
 
+def calc_ists_metrics(pred_file_path, target_file_path):
+  metrics = load_files_to_metrics(pred_file_path, target_file_path)
+  return (metrics.f1_type_match(), metrics.f1_score_match(), metrics.f1_all_match())
+
 
 def main(_):
   tf.logging.set_verbosity(tf.logging.INFO)
@@ -682,6 +695,30 @@ def main(_):
   #### Validate flags
   if FLAGS.save_steps is not None:
     FLAGS.iterations = min(FLAGS.iterations, FLAGS.save_steps)
+
+  if FLAGS.calc_ists_metrics and FLAGS.metrics_dir:
+    predictions = []
+
+    if not FLAGS.pred_file:
+      predictions = model_utils.get_predictions(FLAGS.predict_dir)
+    else:
+      predictions = [model_utils.extract_global_step(FLAGS.pred_file[:-4]), FLAGS.pred_file]
+    
+    dataset_name = FLAGS.DATA_DIR.split("/")[-1]
+
+    # Write metrics to file
+    with tf.gfile.Open(os.path.join(FLAGS.metrics_dir, "{}.tsv".format("metrics-" + dataset_name)), "w") as fout:
+      fout.write("step\\f1-type\\f1-socre\\f1-t+s\n")
+
+      # Calc metric for all predictions
+      for global_step, pred_file_path in sorted(predictions, key=lambda x: x[0]):
+        f1_scores = calc_ists_metrics(pred_file_path, FLAGS.data_dir + "/test.tsv")
+        tf.logging.info( 'Dataset: {} Step: {} [F1 Type]: {} \n [F1 Score]: {} \n [F1 T+S]: {}' % (dataset_name, global_step, *f1_scores))
+        fout.write('{}\t{}\t{}\t{}\n' % (global_step, *f1_scores))
+        
+
+    # End execution after caclulations
+    return None
 
   if FLAGS.do_predict:
     predict_dir = FLAGS.predict_dir
@@ -697,9 +734,9 @@ def main(_):
       "ists": IStsProcessor
   }
 
-  if not FLAGS.do_train and not FLAGS.do_eval and not FLAGS.do_predict:
+  if not FLAGS.do_train and not FLAGS.do_eval and not FLAGS.do_predict and not FLAGS.calc_ists_metrics:
     raise ValueError(
-        "At least one of `do_train`, `do_eval, `do_predict` or "
+        "At least one of `do_train`, `do_eval, `do_predict`, `calc_ists_metrics` or "
         "`do_submit` must be True.")
 
   if not tf.gfile.Exists(FLAGS.output_dir):
