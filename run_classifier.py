@@ -915,7 +915,7 @@ def main(_):
     predictions = []
 
     if not FLAGS.pred_file:
-      predictions = model_utils.get_predictions()
+      predictions = model_utils.get_predictions(FLAGS.predict_dir)
     else:
       predictions = [model_utils.extract_global_step(FLAGS.pred_file[:-4]), FLAGS.pred_file]
     
