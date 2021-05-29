@@ -38,9 +38,9 @@ def preprocess_data(input, output, test_data = False):
         wr.writerows(results)
 
 
-preprocess_data("data/task2/semeval/answers-students/answers_students_test_gs.wa", "ists/answers-students/test.tsv")
+preprocess_data("data/task2/semeval/answers-students/answers_students_test_gs.wa", "ists/answers-students/test.tsv", True)
 preprocess_data("data/task2/semeval/answers-students/answers_students_train_gs.wa", "ists/answers-students/train.tsv")
-preprocess_data("data/task2/semeval/headlines/headlines_test_gs.wa", "ists/headlines/test.tsv")
+preprocess_data("data/task2/semeval/headlines/headlines_test_gs.wa", "ists/headlines/test.tsv", True)
 preprocess_data("data/task2/semeval/headlines/headlines_train_gs.wa", "ists/headlines/train.tsv")
-preprocess_data("data/task2/semeval/images/images_phrases_test_gs.wa", "ists/images/test.tsv")
+preprocess_data("data/task2/semeval/images/images_phrases_test_gs.wa", "ists/images/test.tsv", True)
 preprocess_data("data/task2/semeval/images/images_phrases_train_gs.wa", "ists/images/train.tsv")
