@@ -312,6 +312,22 @@ def get_checkpoints(model_dir):
 
   return steps_and_files
 
+def get_predictions(pred_dir):
+  """Filter out all predictions in the directory and return list [global_step, file_path]."""
+  predictions = []
+  filenames = tf.gfile.ListDirectory(pred_dir)
+
+  for filename in filenames:
+    if filename.endswith(".tsv"):
+      cur_filename = join(pred_dir, filename)
+      global_step = extract_global_step(cur_filename[:-4])
+      tf.logging.info("Add {} to predictions list.".format(cur_filename))
+      predictions.append([global_step, cur_filename])
+
+  predictions = sorted(predictions, key=lambda x: x[0])
+
+  return predictions
+
 
 class AdamWeightDecayOptimizer(tf.train.Optimizer):
   """A basic Adam optimizer that includes "correct" L2 weight decay."""

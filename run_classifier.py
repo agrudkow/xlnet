@@ -27,6 +27,7 @@ import function_builder
 from classifier_utils import PaddingInputExample
 from classifier_utils import convert_single_example
 from prepro_utils import preprocess_text, encode_ids
+from F1metrics import load_files_to_metrics
 
 
 # Model
@@ -139,6 +140,14 @@ flags.DEFINE_string("cls_scope", default=None,
       help="Classifier layer scope.")
 flags.DEFINE_bool("is_regression", default=False,
       help="Whether it's a regression task.")
+
+# ists
+flags.DEFINE_bool("calc_ists_metrics", default=False, help="Calculate metrics for prediotions in iSTS task")
+flags.DEFINE_string("dataset", default=None,
+      help="Specifies tsv file with predictions. If None, ")
+flags.DEFINE_string("pred_file", default=None,
+      help="Specifies tsv file with predictions. If None, ")
+
 
 FLAGS = flags.FLAGS
 
@@ -675,6 +684,10 @@ def get_model_fn(n_class):
 
   return model_fn
 
+def calc_ists_metrics(pred_file_path, target_file_path):
+  metrics = load_files_to_metrics(pred_file_path, target_file_path)
+  return (metrics.f1_type_match(), metrics.f1_score_match(), metrics.f1_all_match())
+
 
 def main(_):
   tf.logging.set_verbosity(tf.logging.INFO)
@@ -899,6 +912,13 @@ def main(_):
 
       with tf.gfile.Open(predict_json_path, "w") as fp:
         json.dump(predict_results, fp, indent=4)
+  
+  if FLAGS.calc_ists_metrics:
+    predictions = model_utils.get_predictions()
+    
+    for global_step, pred_file_path in predictions:
+      f1_scores = calc_ists_metrics(pred_file_path, FLAGS.data_dir + "/test.tsv")
+      tf.logging.info( 'Dataset: ' + FLAGS.data_dir.split("/")[-1] + " Step: " + str(global_step) + ' [F1 Type]: {} \n [F1 Score]: {} \n [F1 T+S]: {}' % f1_scores)
 
 
 if __name__ == "__main__":
