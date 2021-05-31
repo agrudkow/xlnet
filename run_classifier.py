@@ -27,7 +27,7 @@ import function_builder
 from classifier_utils import PaddingInputExample
 from classifier_utils import convert_single_example
 from prepro_utils import preprocess_text, encode_ids
-from f1_metrics import load_files_to_metrics
+from metrics import load_files_to_metrics
 
 
 # Model
@@ -685,8 +685,9 @@ def get_model_fn(n_class):
   return model_fn
 
 def calc_ists_metrics(pred_file_path, target_file_path):
-  metrics = load_files_to_metrics(pred_file_path, target_file_path)
-  return (metrics.f1_type_match(), metrics.f1_score_match(), metrics.f1_all_match())
+  f_metrics, p_metrics = load_files_to_metrics(pred_file_path, target_file_path)
+  return (f_metrics.f1_type_match(), f_metrics.f1_score_match(), f_metrics.f1_all_match(),
+          p_metrics.count_person_for_type(), p_metrics.count_pearson_for_score())
 
 
 def main(_):
@@ -711,13 +712,13 @@ def main(_):
 
     # Write metrics to file
     with tf.gfile.Open(os.path.join(FLAGS.metrics_dir, "{}.tsv".format("metrics-" + dataset_name)), "w") as fout:
-      fout.write("step\tf1-type\tf1-socre\tf1-t+s\n")
+      fout.write("step\tf1-type\tf1-socre\tf1-t+s\tpearson-type\tpearson-score\n")
 
       # Calc metric for all predictions
       for global_step, pred_file_path in sorted(predictions, key=lambda x: x[0]):
-        f1_scores = calc_ists_metrics(pred_file_path, FLAGS.data_dir + "/test.tsv")
-        print('\n Dataset: {}\n Step: {}\n [F1 Type]: {}\n [F1 Score]: {}\n [F1 T+S]: {}'.format(dataset_name, global_step, *f1_scores))
-        fout.write('{}\t{}\t{}\t{}\n'.format(global_step, *f1_scores))
+        metrics = calc_ists_metrics(pred_file_path, FLAGS.data_dir + "/test.tsv")
+        print('\n Dataset: {}\n Step: {}\n [F1 Type]: {}\n [F1 Score]: {}\n [F1 T+S]: {}\n [P T]: {}\n [P S]: {}'.format(dataset_name, global_step, *metrics))
+        fout.write('{}\t{}\t{}\t{}\t{}\t\n'.format(global_step, *metrics))
         
 
     # End execution after caclulations
