@@ -1,13 +1,26 @@
 import re
 import csv
 import os
+from absl import flags
 
 RESULTS = ["EQUI-5", "OPPO-1", "OPPO-2", "OPPO-3", "OPPO-4",
                 "SPE1-1", "SPE1-2", "SPE1-3", "SPE1-4",
                 "SPE2-1", "SPE2-2", "SPE2-3", "SPE2-4",
                 "SIMI-1", "SIMI-2", "SIMI-3", "SIMI-4",
                 "REL-1", "REL-2", "REL-3", "REL-4"]
-def preprocess_data(input, output, test_data = False):
+
+flags.DEFINE_string("unprocessed_data_dir", default="",
+      help="Directory for loading unprocessed data.")
+flags.DEFINE_string("data_dir", default="",
+      help="Directory for saving preprocessed data.")
+
+FLAGS = flags.FLAGS
+
+def preprocess_data(input, output):
+    # Validate flags
+    if not FLAGS.data_dir or not FLAGS.unprocessed_data_dir :
+        raise ValueError(
+            "Flags `unprocessed_data_dir` and `data_dir` have to be provided.")
 
     assert os.path.exists(input), "Input file: {} does not exists".format(input)
 
@@ -37,10 +50,10 @@ def preprocess_data(input, output, test_data = False):
         wr = csv.writer(myfile, delimiter='\t', lineterminator='\n')
         wr.writerows(results)
 
-
-preprocess_data("data/task2/semeval/answers-students/answers_students_test_gs.wa", "ists/answers-students/test.tsv", True)
-preprocess_data("data/task2/semeval/answers-students/answers_students_train_gs.wa", "ists/answers-students/train.tsv")
-preprocess_data("data/task2/semeval/headlines/headlines_test_gs.wa", "ists/headlines/test.tsv", True)
-preprocess_data("data/task2/semeval/headlines/headlines_train_gs.wa", "ists/headlines/train.tsv")
-preprocess_data("data/task2/semeval/images/images_phrases_test_gs.wa", "ists/images/test.tsv", True)
-preprocess_data("data/task2/semeval/images/images_phrases_train_gs.wa", "ists/images/train.tsv")
+if __name__ == "__main__":
+    preprocess_data("data/task2/semeval/answers-students/answers_students_test_gs.wa", "ists/answers-students/test.tsv")
+    preprocess_data("data/task2/semeval/answers-students/answers_students_train_gs.wa", "ists/answers-students/train.tsv")
+    preprocess_data("data/task2/semeval/headlines/headlines_test_gs.wa", "ists/headlines/test.tsv")
+    preprocess_data("data/task2/semeval/headlines/headlines_train_gs.wa", "ists/headlines/train.tsv")
+    preprocess_data("data/task2/semeval/images/images_phrases_test_gs.wa", "ists/images/test.tsv")
+    preprocess_data("data/task2/semeval/images/images_phrases_train_gs.wa", "ists/images/train.tsv")
