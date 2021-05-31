@@ -9,19 +9,23 @@ RESULTS = ["EQUI-5", "OPPO-1", "OPPO-2", "OPPO-3", "OPPO-4",
                 "SIMI-1", "SIMI-2", "SIMI-3", "SIMI-4",
                 "REL-1", "REL-2", "REL-3", "REL-4"]
 
-flags.DEFINE_string("unprocessed_data_dir", default="",
+flags.DEFINE_string("input_path", default="",
       help="Directory for loading unprocessed data.")
-flags.DEFINE_string("data_dir", default="",
+flags.DEFINE_string("output_path", default="",
       help="Directory for saving preprocessed data.")
 
 FLAGS = flags.FLAGS
 
-def preprocess_data(input, output):
+def preprocess_task_data():
     # Validate flags
     if not FLAGS.data_dir or not FLAGS.unprocessed_data_dir :
         raise ValueError(
-            "Flags `unprocessed_data_dir` and `data_dir` have to be provided.")
+            "Flags `input_path` and `output_path` have to be provided.")
 
+    preprocess_data(FLAGS.input_path, FLAGS.output_path)
+
+
+def preprocess_data(input, output):
     assert os.path.exists(input), "Input file: {} does not exists".format(input)
 
     file = open(input, 'r+')
