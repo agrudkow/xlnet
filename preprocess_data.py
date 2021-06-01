@@ -18,7 +18,7 @@ FLAGS = flags.FLAGS
 
 def preprocess_task_data():
     # Validate flags
-    if not FLAGS.data_dir or not FLAGS.unprocessed_data_dir:
+    if not FLAGS.input_path or not FLAGS.output_path:
         raise ValueError(
             "Flags `input_path` and `output_path` have to be provided.")
 
