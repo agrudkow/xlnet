@@ -2,6 +2,7 @@ import re
 import csv
 import os
 from absl import flags
+from absl import app
 
 RESULTS = ["EQUI-5", "OPPO-1", "OPPO-2", "OPPO-3", "OPPO-4",
                 "SPE1-1", "SPE1-2", "SPE1-3", "SPE1-4",
@@ -16,7 +17,7 @@ flags.DEFINE_string("output_path", default="",
 
 FLAGS = flags.FLAGS
 
-def preprocess_task_data():
+def main():
     # Validate flags
     if not FLAGS.input_path or not FLAGS.output_path:
         raise ValueError(
@@ -55,4 +56,4 @@ def preprocess_data(input, output):
         wr.writerows(results)
 
 if __name__ == "__main__":
-   preprocess_task_data() 
+   app.run(main)
