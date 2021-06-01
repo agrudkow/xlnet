@@ -17,7 +17,7 @@ flags.DEFINE_string("output_path", default="",
 
 FLAGS = flags.FLAGS
 
-def main():
+def main(argv):
     # Validate flags
     if not FLAGS.input_path or not FLAGS.output_path:
         raise ValueError(
