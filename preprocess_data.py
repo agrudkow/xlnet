@@ -18,7 +18,7 @@ FLAGS = flags.FLAGS
 
 def preprocess_task_data():
     # Validate flags
-    if not FLAGS.data_dir or not FLAGS.unprocessed_data_dir :
+    if not FLAGS.data_dir or not FLAGS.unprocessed_data_dir:
         raise ValueError(
             "Flags `input_path` and `output_path` have to be provided.")
 
@@ -55,9 +55,4 @@ def preprocess_data(input, output):
         wr.writerows(results)
 
 if __name__ == "__main__":
-    preprocess_data("data/task2/semeval/answers-students/answers_students_test_gs.wa", "ists/answers-students/test.tsv")
-    preprocess_data("data/task2/semeval/answers-students/answers_students_train_gs.wa", "ists/answers-students/train.tsv")
-    preprocess_data("data/task2/semeval/headlines/headlines_test_gs.wa", "ists/headlines/test.tsv")
-    preprocess_data("data/task2/semeval/headlines/headlines_train_gs.wa", "ists/headlines/train.tsv")
-    preprocess_data("data/task2/semeval/images/images_phrases_test_gs.wa", "ists/images/test.tsv")
-    preprocess_data("data/task2/semeval/images/images_phrases_train_gs.wa", "ists/images/train.tsv")
+   preprocess_task_data() 
